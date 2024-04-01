@@ -8,7 +8,7 @@ const schema = a.schema({
 
   askBedrock: a
     .query()
-    .arguments({ ingredients: a.string().array() })
+    .arguments({ base64Image: a.string(), mealType: a.string() })
     .returns(a.ref("BedrockResponse"))
     .authorization([a.allow.public()])
     .handler(

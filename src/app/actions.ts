@@ -1,11 +1,14 @@
 import { amplifyClient } from "./amplify-utils";
 
-export async function generateRecipe(formData: FormData) {
+export async function generateRecipe(img: String, formData: FormData) {
   const response = await amplifyClient.queries.askBedrock({
-    ingredients: [formData.get("ingredients")?.toString() || ""],
+    base64Image: img.toString(),
+    mealType: formData.get("type")?.toString() || "",
   });
-
+  console.log('base64 before parsing data', img.toString());
   const res = JSON.parse(response.data?.body!);
+  console.log('response', res);
   const content = res.content[0].text;
-  return content || "";
+  console.log('content', content);
+  return content || "test";
 }

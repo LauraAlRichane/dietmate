@@ -8,14 +8,20 @@ import { generateRecipe } from "./actions";
 export default function Home() {
   const [result, setResult] = useState<string>("");
   const [loading, setloading] = useState(false);
+  const [file, setFile] = useState<File | undefined>();
+  const [preview, setPreview] = useState<string | ArrayBuffer | null>();
+
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     setloading(true);
     event.preventDefault();
+    console.log('file', file)
 
     try {
+      const base64Image = preview?.toString().split(',') || '';
+      console.log('base64 image after preview split', base64Image[1])
       const formData = new FormData(event.currentTarget);
-      const data = await generateRecipe(formData);
+      const data = await generateRecipe(base64Image[1], formData);
       const recipe = typeof data === "string" ? data : "No data returned";
       setloading(false);
       setResult(recipe);
@@ -23,6 +29,18 @@ export default function Home() {
       alert(`An error occurred: ${e}`);
     }
   };
+
+  const handleOnChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement & {
+      files: FileList;
+    }
+    setFile(target.files[0]);
+    const reader = new FileReader;
+    reader.onload = function() {
+      setPreview(reader.result);
+    }
+    reader.readAsDataURL(target.files[0]);
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center  p-24  m-auto ">
@@ -42,14 +60,30 @@ export default function Home() {
           onSubmit={onSubmit}
           className=" p-4 flex flex-col items-center gap-4  max-w-full mx-auto"
         >
+          <label for="type">Choose meal type:</label>
+          <select name="type" id="type" className="border border-black  text-gray-900 p-4 rounded-lg max-w-full w-full text-xl ">
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="snack">Snack</option>
+          </select>
+          <label for="schedule">Choose meal frequency:</label>
+          <select name="schedule" id="schedule" className="border border-black  text-gray-900 p-4 rounded-lg max-w-full w-full text-xl ">
+            <option value="1">1 Day</option>
+            <option value="2">2 Days</option>
+            {/* <option value="3">3 Days</option>
+            <option value="4">4 Days</option>
+            <option value="5">5 Days</option>
+            <option value="6">6 Days</option> */}
+          </select>
           <input
-            type="text"
-            id="ingredients"
-            name="ingredients"
-            required
-            placeholder="Ingredient1, Ingredient2, Ingredient3,..etc"
-            className="border border-black  text-gray-900 p-4 rounded-lg max-w-full w-full text-xl "
+            type="file"
+            id="image"
+            name="image"
+            accept="image/jpeg"
+            onChange={handleOnChange}
           />
+          <img src={preview} />
           <button
             type="submit"
             className="  text-white p-2 rounded-lg bg-blue-500   w-1/2 text-xl  "

@@ -1,9 +1,7 @@
 export function request(ctx) {
-  const { ingredients = [] } = ctx.args;
+  const { base64Image = '', mealType = '' } = ctx.args;
 
-  const prompt = `Suggest a recipe idea using these ingredients : ${ingredients.join(
-    ","
-  )}.`;
+  const prompt = `Am I passing a fridge image in that prompt? after you answer, please print the following: ${mealType}`;
 
   return {
     resourcePath: `/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke`,
@@ -22,6 +20,14 @@ export function request(ctx) {
               {
                 type: "text",
                 text: `\n\nHuman:${prompt}\n\nAssistant:`,
+              },
+              {
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: "image/jpeg",
+                  data: base64Image,
+                },
               },
             ],
           },
